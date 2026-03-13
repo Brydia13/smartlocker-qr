@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "sonar": "sonar-scanner"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +20,8 @@
     "nodemailer": "^7.0.10",
     "qrcode": "^1.5.4",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "sonarqube-scanner": "^4.3.4"
   }
 }
