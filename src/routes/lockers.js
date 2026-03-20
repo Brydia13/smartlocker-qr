@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'code requerido' });
 
-  db.run('INSERT INTO lockers (code, status) VALUES (?, ?)', [code, 'free'], function(err) {
+  db.run('INSERT INTO lockers (code, status) VALUES (?, ?)', [code, 'free'], function (err) {
     if (err) return res.status(500).json({ error: 'DB error o code duplicado' });
     res.json({ ok: true, id: this.lastID, code });
   });
@@ -67,55 +67,59 @@ router.get('/my-locker', (req, res) => {
   });
 });
 
-// 🔹 POST /api/open-with-qr → abrir locker mediante escaneo QR
+// 🔹 POST /api/open-with-qr →(Mantenimiento Sprint 2)
 router.post('/open-with-qr', (req, res) => {
   const { userId, token } = req.body;
 
+  // Validación de entrada 
   if (!userId || !token) {
     return res.status(400).json({ ok: false, error: 'Datos incompletos' });
   }
 
-  // Enviar correo al usuario
-db.get('SELECT email, name FROM users WHERE id = ?', [userId], async (err, user) => {
-  if (!err && user) {
-    const html = `
-      <h2>Locker abierto correctamente</h2>
-      <p>Hola ${user.name},</p>
-      <p>Se registró la apertura del locker <strong>${locker.code}</strong>.</p>
-      <p>Fecha: ${new Date().toLocaleString()}</p>
-      <p>Si no fuiste tú, repórtalo de inmediato.</p>
-      <br>
-      <small>SmartLock System</small>
-    `;
-    await sendEmail(user.email, 'Notificación de apertura de locker', html);
-  }
-});
-
-  // Verificar que la sesión del usuario sea válida
+  // Verificar sesión primero
   db.get('SELECT * FROM sessions WHERE user_id = ? AND token = ?', [userId, token], (err, session) => {
-    if (err) return res.status(500).json({ ok: false, error: 'DB error en sesión' });
-    if (!session) return res.json({ ok: false, error: 'Sesión inválida' });
+    if (err) return res.status(500).json({ ok: false, error: 'Error de DB en sesión' });
+    if (!session) return res.status(401).json({ ok: false, error: 'Sesión inválida' });
 
-    // Verificar locker asignado
+    // Verificar locker 
     db.get('SELECT * FROM lockers WHERE assigned_user_id = ?', [userId], (err, locker) => {
-      if (err) return res.status(500).json({ ok: false, error: 'DB error en lockers' });
-      if (!locker) return res.json({ ok: false, error: 'No hay locker asignado' });
+      if (err) return res.status(500).json({ ok: false, error: 'Error de DB en lockers' });
+      if (!locker) return res.status(404).json({ ok: false, error: 'No hay locker asignado' });
 
-      // Simular apertura del locker
+      // Simular apertura 
       db.run('UPDATE lockers SET status = ? WHERE id = ?', ['open', locker.id], (err) => {
-        if (err) return res.status(500).json({ ok: false, error: 'DB error al abrir locker' });
+        if (err) return res.status(500).json({ ok: false, error: 'Error al abrir locker' });
 
-        // Volver a poner el locker como ocupado después de 3 segundos
+        // --- INICIO DE PROCESOS POST-APERTURA ---
+
+        // Notificación por Correo (Mantenimiento Correctivo)
+        db.get('SELECT email, name FROM users WHERE id = ?', [userId], async (err, user) => {
+          if (!err && user) {
+            try {
+              const html = `
+                <h2>Locker abierto correctamente</h2>
+                <p>Hola ${user.name},</p>
+                <p>Se registró la apertura del locker <strong>${locker.code}</strong>.</p>
+                <p>Fecha: ${new Date().toLocaleString()}</p>
+                <br><small>SmartLock System</small>`;
+              // Usamos try/catch para que si falla el correo, no afecte la respuesta del usuario
+              await sendEmail(user.email, 'Notificación de apertura', html);
+            } catch (mailError) {
+              console.error("Fallo envío de email, pero el locker se abrió:", mailError);
+            }
+          }
+        });
+
+        // Cierre automático tras 3 segundos
         setTimeout(() => {
           db.run('UPDATE lockers SET status = ? WHERE id = ?', ['occupied', locker.id]);
         }, 3000);
 
-        // Registrar acción en el log
-        db.run(
-          'INSERT INTO access_logs (user_id, locker_id, action, success) VALUES (?, ?, ?, ?)',
-          [userId, locker.id, 'open', 1]
-        );
+        // Registro en Logs
+        db.run('INSERT INTO access_logs (user_id, locker_id, action, success) VALUES (?, ?, ?, ?)',
+          [userId, locker.id, 'open', 1]);
 
+        // Respuesta final al cliente
         res.json({
           ok: true,
           message: `Locker ${locker.code} abierto (simulado)`,
