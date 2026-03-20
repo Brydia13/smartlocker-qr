@@ -1,3 +1,6 @@
+/* =========================================
+   TUS ESTILOS ORIGINALES (No los toqué)
+   ========================================= */
 body {
   font-family: Arial, sans-serif;
   background: #f4f6fa;
@@ -5,6 +8,8 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  margin: 0;
+  /* Añadí esto para quitar bordes blancos feos */
 }
 
 .container {
@@ -36,4 +41,205 @@ button {
 
 button:hover {
   background-color: #1565c0;
+}
+
+/* =========================================
+   NUEVOS ESTILOS SOLO PARA EL LOGIN (Diseño Figma)
+   ========================================= */
+
+/* Sobrescribo el body solo para la página de login */
+.login-body {
+  display: block;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  /* ¡Esto bloquea la página para que no se mueva ni cree barras de desplazamiento! */
+}
+
+.login-split-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* --- PANEL IZQUIERDO --- */
+.login-left {
+  flex: 0 0 40%;
+  padding: 2rem 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-logo {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #000;
+  margin-bottom: auto;
+  /* Empuja el formulario hacia abajo */
+}
+
+.login-form-container {
+  max-width: 380px;
+  width: 100%;
+  margin: 0 auto;
+  margin-bottom: auto;
+  /* Mantiene el formulario centrado verticalmente */
+}
+
+.login-title {
+  font-size: 2.2rem;
+  margin-bottom: 0.3rem;
+  color: #000;
+}
+
+.login-subtitle {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+/* Ajustes específicos para los inputs del login para no afectar los tuyos */
+input.login-input {
+  width: 100%;
+  padding: 1rem;
+  margin: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+input.login-input::placeholder {
+  color: #bbb;
+}
+
+/* Estilo exacto del input Email de tu Figma (Borde azul) */
+.input-floating-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+input.active-input {
+  border: 2px solid #4285F4;
+  /* Azul de Google/Figma */
+}
+
+.floating-label {
+  position: absolute;
+  top: -8px;
+  left: 15px;
+  background: #fff;
+  padding: 0 5px;
+  font-size: 0.75rem;
+  color: #4285F4;
+  font-weight: 600;
+}
+
+/* Estilo exacto del input Password (Ojito) */
+.input-icon-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bbb;
+  cursor: pointer;
+}
+
+/* Checkbox estilo Figma */
+.login-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.login-checkbox-group input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #000;
+}
+
+.login-checkbox-group label {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Botón estilo Figma */
+button.login-btn {
+  width: 100%;
+  background-color: #4285F4;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+button.login-btn:hover {
+  background-color: #3367d6;
+}
+
+.login-footer-text {
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.login-footer-text a {
+  color: #4285F4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-footer-text a:hover {
+  text-decoration: underline;
+}
+
+/* --- PANEL DERECHO (IMAGEN) --- */
+.login-right {
+  flex: 0 0 60%;
+  padding: 1rem 1rem 1rem 0;
+  /* Espacio para que parezca un marco como en tu diseño */
+}
+
+.login-image-wrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  /* Corta la imagen si se sale del borde redondeado */
+}
+
+.login-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Hace que la imagen llene el espacio sin deformarse */
+  display: block;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 800px) {
+  .login-split-layout {
+    flex-direction: column;
+  }
+
+  .login-left {
+    flex: 1;
+    width: 100%;
+    padding: 2rem;
+  }
+
+  .login-right {
+    display: none;
+    /* Esconde la imagen en celulares */
+  }
 }

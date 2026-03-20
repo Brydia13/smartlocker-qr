@@ -27,7 +27,6 @@ router.post("/", (req, res) => {
     function (err) {
       if (err)
         return res.status(500).json({ error: "DB error o code duplicado" });
-
       res.json({ ok: true, id: this.lastID, code });
     },
   );
@@ -45,6 +44,7 @@ router.post("/assign", (req, res) => {
     function (err) {
       if (err) return res.status(500).json({ error: "DB error" });
 
+      // Registrar acción en el log
       db.run(
         "INSERT INTO access_logs (user_id, locker_id, action, success) VALUES (?, ?, ?, ?)",
         [userId, lockerId, "assign", 1],
@@ -55,73 +55,45 @@ router.post("/assign", (req, res) => {
   );
 });
 
-// 🔹 GET /api/lockers/my-locker (SEGURO: solo headers + expiración)
-router.get("/my-locker", (req, res) => {
-  const token = req.headers["x-access-token"];
+// 🔹 POST /api/lockers → crear locker nuevo
+router.post("/", (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: "code requerido" });
 
-  if (!token)
-    return res.status(400).json({ error: "Token requerido en headers" });
+  db.run(
+    "INSERT INTO lockers (code, status) VALUES (?, ?)",
+    [code, "free"],
+    function (err) {
+      if (err)
+        return res.status(500).json({ error: "DB error o code duplicado" });
 
-  db.get(
-    "SELECT user_id, expires_at FROM sessions WHERE token = ?",
-    [token],
-    (err, session) => {
-      if (err) return res.status(500).json({ error: "DB error" });
-
-      if (!session) return res.status(401).json({ error: "Sesión inválida" });
-
-      // 🔒 Validar expiración
-      if (new Date(session.expires_at) < new Date()) {
-        return res.status(401).json({ error: "Sesión expirada" });
-      }
-
-      db.get(
-        "SELECT id, code, assigned_user_id, status FROM lockers WHERE assigned_user_id = ?",
-        [session.user_id],
-        (err, locker) => {
-          if (err) return res.status(500).json({ error: "DB error" });
-
-          if (!locker) return res.json({ locker: null });
-
-          return res.json({ locker });
-        },
-      );
+      res.json({ ok: true, id: this.lastID, code });
     },
   );
 });
 
-// 🔹 POST /api/open-with-qr (SEGURIDAD COMPLETA)
+// 🔹 POST /api/open-with-qr →(Mantenimiento Sprint 2)
 router.post("/open-with-qr", (req, res) => {
   const { userId, token } = req.body;
 
+  // Validación de entrada
   if (!userId || !token) {
     return res.status(400).json({ ok: false, error: "Datos incompletos" });
   }
 
-  // Validar QR seguro
+  // Verificar sesión primero
   db.get(
-    "SELECT * FROM qr_tokens WHERE token = ? AND user_id = ?",
-    [token, userId],
-    (err, qr) => {
+    "SELECT * FROM sessions WHERE user_id = ? AND token = ?",
+    [userId, token],
+    (err, session) => {
       if (err)
-        return res.status(500).json({ ok: false, error: "DB error en QR" });
+        return res
+          .status(500)
+          .json({ ok: false, error: "Error de DB en sesión" });
+      if (!session)
+        return res.status(401).json({ ok: false, error: "Sesión inválida" });
 
-      if (!qr) return res.json({ ok: false, error: "QR inválido" });
-
-      // Expiración
-      if (new Date(qr.expires_at) < new Date()) {
-        return res.json({ ok: false, error: "QR expirado" });
-      }
-
-      // Un solo uso
-      if (qr.used) {
-        return res.json({ ok: false, error: "QR ya utilizado" });
-      }
-
-      // Marcar como usado
-      db.run("UPDATE qr_tokens SET used = 1 WHERE token = ?", [token]);
-
-      // 🔍 Obtener locker
+      // Verificar locker
       db.get(
         "SELECT * FROM lockers WHERE assigned_user_id = ?",
         [userId],
@@ -129,15 +101,13 @@ router.post("/open-with-qr", (req, res) => {
           if (err)
             return res
               .status(500)
-              .json({ ok: false, error: "DB error en lockers" });
-
+              .json({ ok: false, error: "Error de DB en lockers" });
           if (!locker)
-            return res.json({
-              ok: false,
-              error: "No hay locker asignado",
-            });
+            return res
+              .status(404)
+              .json({ ok: false, error: "No hay locker asignado" });
 
-          // 🔓 Abrir locker
+          // Simular apertura
           db.run(
             "UPDATE lockers SET status = ? WHERE id = ?",
             ["open", locker.id],
@@ -147,7 +117,38 @@ router.post("/open-with-qr", (req, res) => {
                   .status(500)
                   .json({ ok: false, error: "Error al abrir locker" });
 
-              // ⏱️ Auto cierre
+              // --- INICIO DE PROCESOS POST-APERTURA ---
+
+              // Notificación por Correo (Mantenimiento Correctivo)
+              db.get(
+                "SELECT email, name FROM users WHERE id = ?",
+                [userId],
+                async (err, user) => {
+                  if (!err && user) {
+                    try {
+                      const html = `
+                <h2>Locker abierto correctamente</h2>
+                <p>Hola ${user.name},</p>
+                <p>Se registró la apertura del locker <strong>${locker.code}</strong>.</p>
+                <p>Fecha: ${new Date().toLocaleString()}</p>
+                <br><small>SmartLock System</small>`;
+                      // Usamos try/catch para que si falla el correo, no afecte la respuesta del usuario
+                      await sendEmail(
+                        user.email,
+                        "Notificación de apertura",
+                        html,
+                      );
+                    } catch (mailError) {
+                      console.error(
+                        "Fallo envío de email, pero el locker se abrió:",
+                        mailError,
+                      );
+                    }
+                  }
+                },
+              );
+
+              // Cierre automático tras 3 segundos
               setTimeout(() => {
                 db.run("UPDATE lockers SET status = ? WHERE id = ?", [
                   "occupied",
@@ -155,40 +156,16 @@ router.post("/open-with-qr", (req, res) => {
                 ]);
               }, 3000);
 
-              // 📝 Log
+              // Registro en Logs
               db.run(
                 "INSERT INTO access_logs (user_id, locker_id, action, success) VALUES (?, ?, ?, ?)",
                 [userId, locker.id, "open", 1],
               );
 
-              // 📧 Correo (CORREGIDO: locker ya existe aquí)
-              db.get(
-                "SELECT email, name FROM users WHERE id = ?",
-                [userId],
-                async (err, user) => {
-                  if (!err && user) {
-                    const html = `
-                      <h2>Locker abierto correctamente</h2>
-                      <p>Hola ${user.name},</p>
-                      <p>Se registró la apertura del locker <strong>${locker.code}</strong>.</p>
-                      <p>Fecha: ${new Date().toLocaleString()}</p>
-                      <p>Si no fuiste tú, repórtalo de inmediato.</p>
-                      <br>
-                      <small>SmartLock System</small>
-                    `;
-
-                    await sendEmail(
-                      user.email,
-                      "Notificación de apertura de locker",
-                      html,
-                    );
-                  }
-                },
-              );
-
+              // Respuesta final al cliente
               res.json({
                 ok: true,
-                message: `Locker ${locker.code} abierto`,
+                message: `Locker ${locker.code} abierto (simulado)`,
                 lockerId: locker.id,
               });
             },
@@ -199,7 +176,7 @@ router.post("/open-with-qr", (req, res) => {
   );
 });
 
-// 🔹 GET /api/lockers/logs → historial
+// 🔹 GET /api/lockers/logs → historial de accesos
 router.get("/logs", (req, res) => {
   db.all(
     `SELECT 
