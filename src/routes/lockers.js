@@ -66,7 +66,7 @@ router.post("/", (req, res) => {
 router.post('/open-with-qr', (req, res) => {
   const { userId, token } = req.body;
 
-  // Validación de entrada 
+  // Validación de entrada
   if (!userId || !token) {
     return res.status(400).json({ ok: false, error: "Datos incompletos" });
   }
