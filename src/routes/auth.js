@@ -42,7 +42,9 @@ router.post('/register', (req, res) => {
         const qr = await QRCode.toDataURL(payload, { errorCorrectionLevel: 'H' });
 
         // Guardar sesión en BD
-        db.run("INSERT INTO sessions (user_id, token) VALUES (?, ?)", [newUser.id, token]);
+        db.run("INSERT INTO sessions (user_id, token) VALUES (?, ?)", [newUser.id, token], (err) => {
+          if (err) console.error('Error creando sesión:', err);
+        });
 
         // Enviar correo con QR
         try {
@@ -103,6 +105,8 @@ router.get('/users', (req, res) => {
   db.all('SELECT id, name, email, dob, created_at FROM users', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Error al obtener usuarios' });
     res.json({ users: rows });
+  });
+});
   });
 });
 

@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
     "sonar": "sonar-scanner"
   },
   "keywords": [],
@@ -22,6 +26,8 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "sonarqube-scanner": "^4.3.4"
+    "jest": "^30.3.0",
+    "sonarqube-scanner": "^4.3.4",
+    "supertest": "^7.2.2"
   }
 }
