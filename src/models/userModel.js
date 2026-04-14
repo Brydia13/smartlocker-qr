@@ -1,20 +1,28 @@
-// src/models/userModel.js
 const db = require('../db');
 
-module.exports = {
-  createUser({ name, email, password }, cb) {
-    const sql = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-    db.run(sql, [name, email, password], function(err) {
-      if (err) return cb(err);
-      db.get('SELECT id, name, email, created_at FROM users WHERE id = ?', [this.lastID], cb);
+const userModel = {
+  // Buscar un usuario por su correo
+  findByEmail: (email, callback) => {
+    db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
+      callback(err, row);
     });
   },
 
-  findByEmail(email, cb) {
-    db.get('SELECT * FROM users WHERE email = ?', [email], cb);
-  },
+  // Crear un usuario nuevo (¡Aquí guardamos el dob!)
+  createUser: (userData, callback) => {
+    const { name, dob, email, password } = userData;
 
-  findById(id, cb) {
-    db.get('SELECT id, name, email, created_at FROM users WHERE id = ?', [id], cb);
+    db.run(
+      'INSERT INTO users (name, dob, email, password) VALUES (?, ?, ?, ?)',
+      [name, dob, email, password],
+      function (err) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, { id: this.lastID, name, dob, email });
+      }
+    );
   }
 };
+
+module.exports = userModel;

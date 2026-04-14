@@ -3,16 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Lock – Dashboard</title>
+  <title>SmartLock | Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <h1>Bienvenida, <span id="userName"></span> 👋</h1>
-    <p>Escanea este código para abrir tu locker:</p>
-    <img id="qrImage" src="" alt="QR del usuario" />
-    <div id="lockerInfo" style="margin-top: 1rem;"></div>
-    <button onclick="logout()">Cerrar sesión</button>
+  <div class="glass-container">
+    <h1>Hola, <span id="userName" style="color: var(--primary);">Usuario</span></h1>
+    <p>Esta es tu llave digital. Muéstrala al lector para abrir tu locker.</p>
+    
+    <div class="qr-card">
+      <img id="qrImage" src="" alt="Tu QR de Acceso" />
+    </div>
+
+    <div id="lockerInfo">
+      <div class="status-badge" id="statusBadge">
+        <span id="lockerStatusText">Obteniendo estado...</span>
+      </div>
+      <div id="lockerDetails" style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted);"></div>
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 10px;">
+      <button class="btn-primary" onclick="window.location.href='scan.html'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Escanear Locker
+      </button>
+      <button class="btn-outline" onclick="logout()">Cerrar sesión</button>
+    </div>
   </div>
 
   <script>
@@ -26,24 +44,27 @@
       document.getElementById("userName").innerText = user.name;
       document.getElementById("qrImage").src = qr;
 
-      // 🔹 Consultar locker asignado desde el backend
+      // Consultar locker asignado
       fetch(`/api/lockers/my-locker?token=${token}`)
         .then(res => res.json())
         .then(data => {
-          const lockerDiv = document.getElementById("lockerInfo");
+          const badge = document.getElementById("statusBadge");
+          const statusText = document.getElementById("lockerStatusText");
+          const details = document.getElementById("lockerDetails");
+
           if (data.locker) {
-            lockerDiv.innerHTML = `
-              <p><strong>Locker asignado:</strong> ${data.locker.code}</p>
-              <p><strong>Estado:</strong> ${data.locker.status}</p>
-            `;
+            badge.classList.remove("inactive");
+            statusText.innerHTML = `Locker ${data.locker.code} - ${data.locker.status.toUpperCase()}`;
+            details.innerHTML = "Tu locker asignado está listo para ser usado.";
           } else {
-            lockerDiv.innerHTML = "<p style='color: gray'>No tienes locker asignado aún.</p>";
+            badge.classList.add("inactive");
+            statusText.innerText = "¡Listo para comenzar!";
+            details.innerHTML = "Escanea el código QR de un locker disponible para que se te asigne automáticamente.";
           }
         })
         .catch(err => {
           console.error(err);
-          document.getElementById("lockerInfo").innerHTML =
-            "<p style='color:red'>Error al obtener información del locker.</p>";
+          document.getElementById("lockerStatusText").innerText = "Error de conexión";
         });
     }
 

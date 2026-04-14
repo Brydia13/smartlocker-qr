@@ -3,18 +3,29 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'ana.29banana@gmail.com',
-    pass: 'uolq cbmh xpkj esjl'
+    user: 'cricrilope3@gmail.com',
+    pass: 'rqnr gdnv dfnp upmj'
   }
 });
 
-async function sendEmail(to, subject, html) {
-  return transporter.sendMail({
-    from: '"SmartLock System" <ana.29banana@gmail.com>',
+async function sendEmail(to, subject, html, attachmentUrl = null) {
+  const mailOptions = {
+    from: '"SmartLock System" cricrilope3@gmail.com>',
     to,
     subject,
     html
-  });
+  };
+
+  if (attachmentUrl) {
+    mailOptions.attachments = [
+      {
+        filename: 'qr-code.png',
+        path: attachmentUrl
+      }
+    ];
+  }
+
+  return transporter.sendMail(mailOptions);
 }
 
 module.exports = { sendEmail };

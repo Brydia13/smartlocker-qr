@@ -1,133 +1,290 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="es">
+
 <head>
-  <meta charset="utf-8">
-  <title>SmartLock - Admin</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartLock | Admin Command Center</title>
   <link rel="stylesheet" href="admin-style.css">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 (Versión estable) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body>
-  <div class="container">
-    <h1>Admin — Lockers</h1>
 
-    <div>
-      <input id="newCode" placeholder="Código locker (ej: LCK-01)" />
-      <button id="create">Crear locker</button>
-    </div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2><span>SmartLock</span></h2>
+    <a href="#" onclick="showSection('dashboard')" id="nav-dashboard" class="active">
+      <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+    </a>
+    <a href="#" onclick="showSection('users')" id="nav-users">
+      <i class="fas fa-users"></i> <span>Usuarios</span>
+    </a>
+    <a href="#" onclick="showSection('lockers')" id="nav-lockers">
+      <i class="fas fa-box"></i> <span>Lockers</span>
+    </a>
+    <a href="#" onclick="showSection('logs')" id="nav-logs">
+      <i class="fas fa-history"></i> <span>Historial</span>
+    </a>
 
-    <h3 style="margin-top:12px">Lockers</h3>
-    <div id="list"></div>
+    <a href="login.html" class="logout">
+      <i class="fas fa-sign-out-alt"></i> <span>Cerrar sesión</span>
+    </a>
+  </div>
 
-    <h3 style="margin-top:12px">Asignar locker</h3>
-    <input id="assignLockerId" placeholder="Locker id" />
-    <input id="assignUserId" placeholder="User id" />
-    <button id="assignBtn">Asignar</button>
+  <!-- Main Content -->
+  <div class="content">
 
-    <p id="msg" style="margin-top:8px"></p>
+    <!-- DASHBOARD SECTION -->
+    <section id="section-dashboard" class="view-section active">
+      <h1 class="section-title">Panel de Control</h1>
 
-    <h3 style="margin-top:20px">Historial de accesos</h3>
-    <div id="logs"></div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <small>Usuarios Totales</small>
+          <strong id="stat-users">-</strong>
+        </div>
+        <div class="stat-card">
+          <small>Lockers Libres</small>
+          <strong id="stat-free" style="color: var(--success);">-</strong>
+        </div>
+        <div class="stat-card">
+          <small>Lockers Ocupados</small>
+          <strong id="stat-occupied" style="color: var(--primary);">-</strong>
+        </div>
+        <div class="stat-card">
+          <small>Accesos Totales</small>
+          <strong id="stat-logs">-</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Actividad Reciente</h3>
+        <div class="table-container" style="margin-top: 15px;">
+          <table id="recent-logs-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Locker</th>
+                <th>Acción</th>
+                <th>Hora</th>
+              </tr>
+            </thead>
+            <tbody id="recent-logs-list">
+              <!-- JS Injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- USERS SECTION -->
+    <section id="section-users" class="view-section">
+      <h1 class="section-title">Gestión de Usuarios</h1>
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Registro</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-list">
+              <!-- JS Injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOCKERS SECTION -->
+    <section id="section-lockers" class="view-section">
+      <h1 class="section-title">Maestro de Lockers</h1>
+
+      <div class="card" style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+        <input type="text" id="new-locker-code" placeholder="Código (ej: LCK-101)"
+          style="flex:1; background: var(--glass); border: 1px solid var(--glass-border); padding: 10px; border-radius: 10px; color: white;">
+        <button onclick="createLocker()"><i class="fas fa-plus"></i> Crear Locker</button>
+      </div>
+
+      <div class="locker-grid" id="lockers-grid">
+        <!-- JS Injected -->
+      </div>
+    </section>
+
+    <!-- LOGS SECTION -->
+    <section id="section-logs" class="view-section">
+      <h1 class="section-title">Historial Completo</h1>
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Usuario</th>
+                <th>Locker</th>
+                <th>Acción</th>
+                <th>Éxito</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="full-logs-list">
+              <!-- JS Injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script>
-    // 🔹 Cargar lista de lockers
+    // --- NAVEGACIÓN SPA ---
+    function showSection(sectionId) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+
+      document.getElementById(`section-${sectionId}`).classList.add('active');
+      document.getElementById(`nav-${sectionId}`).classList.add('active');
+
+      // Cargar datos según sección
+      if (sectionId === 'dashboard') loadStats();
+      if (sectionId === 'users') loadUsers();
+      if (sectionId === 'lockers') loadLockers();
+      if (sectionId === 'logs') loadFullLogs();
+    }
+
+    // --- CARGAR ESTADÍSTICAS ---
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/lockers/admin/stats');
+        const stats = await res.json();
+        document.getElementById('stat-users').innerText = stats.totalUsers || 0;
+        document.getElementById('stat-free').innerText = stats.freeLockers || 0;
+        document.getElementById('stat-occupied').innerText = stats.occupiedLockers || 0;
+        document.getElementById('stat-logs').innerText = stats.totalLogs || 0;
+
+        // Cargar últimos logs para el dashboard
+        const logsRes = await fetch('/api/logs');
+        const logsData = await logsRes.json();
+        const list = document.getElementById('recent-logs-list');
+        list.innerHTML = logsData.logs.slice(0, 5).map(l => `
+          <tr>
+            <td>${l.user_name || 'Desconocido'}</td>
+            <td>${l.locker_code || '-'}</td>
+            <td>${l.action}</td>
+            <td>${new Date(l.created_at).toLocaleTimeString()}</td>
+          </tr>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    // --- CARGAR USUARIOS ---
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      const list = document.getElementById('users-list');
+      list.innerHTML = data.users.map(u => `
+        <tr>
+          <td>#${u.id}</td>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+          <td>
+            <button class="danger" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i> Borrar</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // --- CARGAR LOCKERS ---
     async function loadLockers() {
       const res = await fetch('/api/lockers');
       const data = await res.json();
-      const list = document.getElementById('list');
-      list.innerHTML = '';
-      data.lockers.forEach(l => {
-        list.innerHTML += `
-          <div style="padding:8px;border:1px solid #eee;margin-bottom:6px">
-            <strong>ID:</strong> ${l.id} &nbsp; 
-            <strong>Code:</strong> ${l.code} &nbsp; 
-            <strong>Status:</strong> ${l.status} &nbsp; 
-            <strong>Assigned:</strong> ${l.assigned_user_id || '-'}
-          </div>`;
-      });
+      const grid = document.getElementById('lockers-grid');
+      grid.innerHTML = data.lockers.map(l => `
+        <div class="locker-item">
+          <div class="locker-info">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+               <span class="status-dot status-${l.status}"></span>
+               <strong style="font-size: 1.2rem; letter-spacing: 1px;">${l.code}</strong>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">
+              ${l.assigned_user_id ?
+          `<i class="fas fa-user" style="margin-right: 5px;"></i> Ocupado por <span style="color: var(--primary)">${l.user_name || 'Desconocido'}</span>` :
+          `<i class="fas fa-check-circle" style="margin-right: 5px;"></i> Disponible`}
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="secondary" onclick="resetLocker(${l.id})" style="flex: 1; justify-content: center;">
+              <i class="fas fa-undo"></i> Reset
+            </button>
+            <button class="danger" onclick="deleteLocker(${l.id})" title="Eliminar definitivamente" style="padding: 8px 12px;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // 🔹 Crear nuevo locker
-    document.getElementById('create').addEventListener('click', async () => {
-      const code = document.getElementById('newCode').value.trim();
+    // --- CARGAR FULL LOGS ---
+    async function loadFullLogs() {
+      const res = await fetch('/api/logs');
+      const data = await res.json();
+      const list = document.getElementById('full-logs-list');
+      list.innerHTML = data.logs.map(l => `
+        <tr>
+          <td>${l.id}</td>
+          <td>${l.user_name || '-'}</td>
+          <td>${l.locker_code || '-'}</td>
+          <td>${l.action}</td>
+          <td>${l.success ? '<i class="fas fa-check-circle" style="color:var(--success)"></i>' : '<i class="fas fa-times-circle" style="color:var(--danger)"></i>'}</td>
+          <td>${new Date(l.created_at).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    // --- ACCIONES ---
+    async function createLocker() {
+      const code = document.getElementById('new-locker-code').value;
       if (!code) return;
-      await fetch('/api/lockers', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ code }) 
-      });
-      document.getElementById('newCode').value = '';
-      await loadLockers();
-      await loadLogs(); // 🔸 actualizar historial
-    });
-
-    // 🔹 Asignar locker
-    document.getElementById('assignBtn').addEventListener('click', async () => {
-      const lockerId = document.getElementById('assignLockerId').value.trim();
-      const userId = document.getElementById('assignUserId').value.trim();
-      const msg = document.getElementById('msg');
-
-      if (!lockerId || !userId) {
-        msg.style.color = 'red';
-        msg.textContent = 'Faltan datos';
-        return;
-      }
-
-      msg.textContent = 'Enviando...';
-
-      const res = await fetch('/api/lockers/assign', {
+      await fetch('/api/lockers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lockerId: Number(lockerId), userId: Number(userId) })
+        body: JSON.stringify({ code })
       });
-
-      const data = await res.json();
-      if (data.ok) {
-        msg.style.color = 'green';
-        msg.textContent = 'Asignado correctamente ✅';
-        await loadLockers();
-        await loadLogs(); // 🔸 actualizar historial
-      } else {
-        msg.style.color = 'red';
-        msg.textContent = data.error || 'Error';
-      }
-    });
-
-    // 🔹 Cargar historial de accesos
-    async function loadLogs() {
-      const res = await fetch('/api/lockers/logs');
-      const data = await res.json();
-      const logsDiv = document.getElementById('logs');
-      logsDiv.innerHTML = `
-        <table border="1" style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <tr style="background:#eee;">
-            <th>ID</th>
-            <th>Usuario</th>
-            <th>Locker</th>
-            <th>Acción</th>
-            <th>Éxito</th>
-            <th>Fecha</th>
-          </tr>
-          ${data.logs.map(log => `
-            <tr>
-              <td>${log.id}</td>
-              <td>${log.user_name || '-'}</td>
-              <td>${log.locker_code || '-'}</td>
-              <td>${log.action}</td>
-              <td>${log.success ? '✅' : '❌'}</td>
-              <td>${new Date(log.created_at).toLocaleString()}</td>
-            </tr>
-          `).join('')}
-        </table>
-      `;
+      document.getElementById('new-locker-code').value = '';
+      loadLockers();
     }
 
-    // 🔹 Inicializar
-    loadLockers();
-    loadLogs();
+    async function deleteLocker(id) {
+      if (!confirm('¿⚠️ Estás seguro de que deseas eliminar este locker definitivamente? Esta acción no se puede deshacer.')) return;
+      await fetch(`/api/lockers/${id}`, { method: 'DELETE' });
+      loadLockers();
+    }
+
+    async function resetLocker(id) {
+      if (!confirm('¿Deseas liberar este locker manualmente?')) return;
+      await fetch(`/api/lockers/reset/${id}`, { method: 'POST' });
+      loadLockers();
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('¿Borrar usuario y liberar sus lockers?')) return;
+      await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      loadUsers();
+    }
+
+    // Inicializar
+    showSection('dashboard');
   </script>
 </body>
+
 </html>
-
-
