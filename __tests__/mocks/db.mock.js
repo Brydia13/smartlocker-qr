@@ -6,11 +6,12 @@ const handleInsertUsers = (params, callback) => {
   const user = {
     id: dbMock.data.users.length + 1,
     name: params[0],
-    email: params[1],
-    password: params[2],
+    dob: params[1],
+    email: params[2],
+    password: params[3],
     created_at: new Date().toISOString()
   };
-  if (dbMock.data.users.some(u => u.email === params[1])) {
+  if (dbMock.data.users.some(u => u.email === params[2])) {
     callback(new Error('UNIQUE constraint failed: users.email'));
   } else {
     dbMock.data.users.push(user);

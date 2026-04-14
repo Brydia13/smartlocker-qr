@@ -107,8 +107,6 @@ router.get('/users', (req, res) => {
     res.json({ users: rows });
   });
 });
-  });
-});
 
 // DELETE /api/users/:id → Eliminar un usuario y limpiar sus datos
 router.delete('/users/:id', (req, res) => {

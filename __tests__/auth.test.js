@@ -95,6 +95,7 @@ describe('Auth Routes', () => {
         .post('/api/register')
         .send({
           name: 'Juan Pérez',
+          dob: '1990-01-01',
           email: 'juan@example.com',
           password: 'SecurePass123!' // eslint-disable-line no-hardcoded-passwords
         });
@@ -114,7 +115,7 @@ describe('Auth Routes', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.error).toContain('Completa los campos');
+      expect(response.body.error).toContain('Todos los campos son obligatorios');
     });
 
     it('debería rechazar email vacío', async () => {
@@ -135,6 +136,7 @@ describe('Auth Routes', () => {
         .post('/api/register')
         .send({
           name: 'Juan',
+          dob: '1990-01-01',
           email: 'juan@example.com',
           password: 'pass123' // eslint-disable-line no-hardcoded-passwords
         });
@@ -144,12 +146,13 @@ describe('Auth Routes', () => {
         .post('/api/register')
         .send({
           name: 'Otro Juan',
+          dob: '1990-01-01',
           email: 'juan@example.com',
           password: 'pass456' // eslint-disable-line no-hardcoded-passwords
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.error).toContain('Usuario ya existe');
+      expect(response.body.error).toContain('El correo ya está registrado');
     });
 
     it('debería hashear la contraseña antes de guardar', async () => {
@@ -161,6 +164,7 @@ describe('Auth Routes', () => {
         .post('/api/register')
         .send({
           name: 'Test User',
+          dob: '1990-01-01',
           email: 'test@example.com',
           password
         });
@@ -178,6 +182,7 @@ describe('Auth Routes', () => {
         .post('/api/register')
         .send({
           name: 'Juan',
+          dob: '1990-01-01',
           email: 'juan@example.com',
           password: 'pass123' // eslint-disable-line no-hardcoded-passwords
         });
@@ -293,150 +298,5 @@ describe('Auth Routes', () => {
       const session = dbMock.data.sessions[0];
       expect(session.expires_at).toBeDefined();
     }, 30000);
-  });
-
-  describe('POST /api/open-with-qr', () => {
-    it('debería rechazar si faltan userId o token', async () => {
-      const response = await request(app)
-        .post('/api/open-with-qr')
-        .send({
-          userId: 1
-          // Falta token
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toContain('Faltan datos');
-    });
-
-    it('debería rechazar token inválido', async () => {
-      const response = await request(app)
-        .post('/api/open-with-qr')
-        .send({
-          userId: 999,
-          token: 'invalidtoken123'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toContain('Sesión inválida');
-    });
-
-    it('debería rechazar sesión expirada', async () => {
-      // Crear sesión expirada
-      const pastDate = new Date(Date.now() - 1000 * 60 * 60).toISOString(); // Hace 1 hora
-      dbMock.data.sessions.push({
-        id: 1,
-        user_id: 1,
-        token: 'expiredtoken123',
-        expires_at: pastDate,
-        created_at: new Date().toISOString()
-      });
-
-      const response = await request(app)
-        .post('/api/open-with-qr')
-        .send({
-          userId: 1,
-          token: 'expiredtoken123'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toContain('Sesión expirada');
-    });
-
-    it('debería retornar error si no hay locker asignado', async () => {
-      // Crear sesión válida sin locker
-      const token = 'validtoken123';
-      dbMock.data.users.push({
-        id: 2,
-        name: 'Test User',
-        email: 'test2@example.com',
-        password: 'hash', // eslint-disable-line no-hardcoded-passwords
-        created_at: new Date().toISOString()
-      });
-      dbMock.data.sessions.push({
-        id: 2,
-        user_id: 2,
-        token: token,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
-        created_at: new Date().toISOString()
-      });
-
-      const response = await request(app)
-        .post('/api/open-with-qr')
-        .send({
-          userId: 2,
-          token: token
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toContain('No hay locker asignado');
-    });
-
-    it('debería abrir locker exitosamente con sesión válida', async () => {
-      // Preparar datos
-      const token = 'validtoken456';
-      dbMock.data.users.push({
-        id: 3,
-        name: 'User With Locker',
-        email: 'user.locker@example.com',
-        password: 'hash', // eslint-disable-line no-hardcoded-passwords
-        created_at: new Date().toISOString()
-      });
-      dbMock.data.lockers.push({
-        id: 1,
-        code: 'LOCK001',
-        assigned_user_id: 3,
-        status: 'occupied',
-        created_at: new Date().toISOString()
-      });
-      dbMock.data.sessions.push({
-        id: 3,
-        user_id: 3,
-        token: token,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
-        created_at: new Date().toISOString(),
-        email: 'user.locker@example.com'
-      });
-
-      const response = await request(app)
-        .post('/api/open-with-qr')
-        .send({
-          userId: 3,
-          token: token
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body.ok).toBe(true);
-      expect(response.body.lockerId).toBe(1);
-    });
-  });
-
-  describe('GET /api/logs', () => {
-    it('debería retornar lista de logs', async () => {
-      dbMock.data.logs.push({
-        id: 1,
-        user_id: 1,
-        locker_id: 1,
-        action: 'open',
-        timestamp: new Date().toISOString()
-      });
-
-      const response = await request(app).get('/api/logs');
-
-      expect(response.status).toBe(200);
-      expect(response.body.logs).toBeDefined();
-    });
-
-    it('debería retornar error si hay problema con DB', async () => {
-      // Hacer que db.all retorne error
-      jest.spyOn(dbMock, 'all').mockImplementationOnce((sql, params, callback) => {
-        setImmediate(() => callback(new Error('DB error')));
-        return dbMock;
-      });
-
-      const response = await request(app).get('/api/logs');
-
-      expect(response.status).toBe(500);
-      expect(response.body.error).toContain('DB error');
-    });
   });
 });

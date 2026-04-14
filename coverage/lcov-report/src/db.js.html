@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>0/15</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>0/15</span>
             </div>
         
             
@@ -123,7 +123,9 @@
 <a name='L58'></a><a href='#L58'>58</a>
 <a name='L59'></a><a href='#L59'>59</a>
 <a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -137,33 +139,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -180,10 +159,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/db.js
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/db.js
 const sqlite3 = <span class="cstat-no" title="statement not covered" >require('sqlite3').verbose();</span>
 const path = <span class="cstat-no" title="statement not covered" >require('path');</span>
 &nbsp;
@@ -197,23 +201,28 @@ const db = <span class="cstat-no" title="statement not covered" >new sqlite3.Dat
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >db.serialize(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-  
-<span class="cstat-no" title="statement not covered" >db.run(`CREATE TABLE IF NOT EXISTS access_logs (</span>
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER,
-  locker_id INTEGER,
-  action TEXT, -- 'open', 'close', 'assign', etc.
-  success INTEGER DEFAULT 1, -- 1 true, 0 false
-  created_at DATETIME DEFAULT (datetime('now','localtime'))
-)`);
+<span class="cstat-no" title="statement not covered" >  db.run(`CREATE TABLE IF NOT EXISTS access_logs (</span>
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    locker_id INTEGER,
+    action TEXT,
+    success INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT (datetime('now','localtime'))
+  )`);
 &nbsp;
+  // 👇 AQUÍ AGREGAMOS LA COLUMNA dob 👇
 <span class="cstat-no" title="statement not covered" >  db.run(`CREATE TABLE IF NOT EXISTS users (</span>
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
+    dob TEXT, 
     email TEXT UNIQUE,
     password TEXT,
     created_at DATETIME DEFAULT (datetime('now','localtime'))
-  )`);
+  )`, <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+    // Si la tabla ya existe sin 'dob', la agregamos manualmente.
+    // Ignoramos el error si la columna ya existe
+<span class="cstat-no" title="statement not covered" >    db.run("ALTER TABLE users ADD COLUMN dob TEXT", <span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; {});</span>
+  });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  db.run(`CREATE TABLE IF NOT EXISTS lockers (</span>
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -230,27 +239,24 @@ const db = <span class="cstat-no" title="statement not covered" >new sqlite3.Dat
     created_at DATETIME DEFAULT (datetime('now','localtime')),
     expires_at DATETIME
   )`);
-<span class="cstat-no" title="statement not covered" >  db.run(`</span>
-  CREATE TABLE IF NOT EXISTS logs (
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  db.run(`CREATE TABLE IF NOT EXISTS logs (</span>
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
     locker_id INTEGER,
     action TEXT,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-&nbsp;
+  )`);
 });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = db;</span>
-&nbsp;</pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >module.exports = db;</span></pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-24T19:53:22.676Z
+                at 2026-04-14T19:04:46.145Z
             </div>
         <script src="../prettify.js"></script>
         <script>

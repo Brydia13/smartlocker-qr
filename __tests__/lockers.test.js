@@ -138,7 +138,7 @@ describe('Lockers Routes', () => {
         });
 
       expect(response.status).toBe(404);
-      expect(response.body.error).toContain('No hay locker asignado');
+      expect(response.body.error).toContain('No hay lockers libres disponibles');
     });
 
     it('debería abrir locker con credenciales válidas', async () => {
