@@ -56,13 +56,31 @@ router.post('/assign', (req, res) => {
   );
 });
 
+// Helper: auto-asigna un locker libre al usuario y lo abre
+function autoAssignAndOpen(userId, res) {
+  db.get('SELECT * FROM lockers WHERE status = ? LIMIT 1', ['free'], (err, freeLocker) => {
+    if (err) return res.status(500).json({ ok: false, error: 'Error buscando locker libre' });
+    if (!freeLocker) {
+      return res.status(404).json({ ok: false, error: 'No hay lockers libres disponibles' });
+    }
+    db.run(
+      'UPDATE lockers SET assigned_user_id = ?, status = ? WHERE id = ?',
+      [userId, 'occupied', freeLocker.id],
+      (dbErr) => {
+        if (dbErr) return res.status(500).json({ ok: false, error: 'Error al auto-asignar locker' });
+        openLocker(freeLocker, userId, res, true);
+      }
+    );
+  });
+}
+
 // 🔹 POST /api/open-with-qr → Escaneo de QR (Usuario o ESP32)
 router.post('/open-with-qr', (req, res) => {
   const { userId, token } = req.body;
 
-  // Validación de entrada 
+  // Validación de entrada
   if (!userId || !token) {
-    return res.status(400).json({ ok: false, error: "Datos incompletos" });
+    return res.status(400).json({ ok: false, error: 'Datos incompletos' });
   }
 
   // 1. Verificar sesión primero
@@ -71,32 +89,15 @@ router.post('/open-with-qr', (req, res) => {
     if (!session) return res.status(401).json({ ok: false, error: 'Sesión inválida' });
 
     // 2. Verificar si ya tiene un locker asignado
-    db.get('SELECT * FROM lockers WHERE assigned_user_id = ?', [userId], (err, locker) => {
-      if (err) return res.status(500).json({ ok: false, error: 'Error de DB en lockers' });
+    db.get('SELECT * FROM lockers WHERE assigned_user_id = ?', [userId], (lockerErr, locker) => {
+      if (lockerErr) return res.status(500).json({ ok: false, error: 'Error de DB en lockers' });
 
       if (locker) {
         // --- CASO A: YA TIENE LOCKER ---
         openLocker(locker, userId, res);
       } else {
-        // --- CASO B: NO TIENE LOCKER -> AUTO-ASIGNACIÓN (Self-Service) ---
-        db.get('SELECT * FROM lockers WHERE status = ? LIMIT 1', ['free'], (err, freeLocker) => {
-          if (err) return res.status(500).json({ ok: false, error: 'Error buscando locker libre' });
-          if (!freeLocker) {
-            return res.status(404).json({ ok: false, error: 'No hay lockers libres disponibles' });
-          }
-
-          // Asignar el locker al usuario
-          db.run(
-            'UPDATE lockers SET assigned_user_id = ?, status = ? WHERE id = ?',
-            [userId, 'occupied', freeLocker.id],
-            (err) => {
-              if (err) return res.status(500).json({ ok: false, error: 'Error al auto-asignar locker' });
-              
-              // Abrir el locker recién asignado
-              openLocker(freeLocker, userId, res, true);
-            }
-          );
-        });
+        // --- CASO B: NO TIENE LOCKER -> AUTO-ASIGNACIÓN ---
+        autoAssignAndOpen(userId, res);
       }
     });
   });

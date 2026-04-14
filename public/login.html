@@ -25,7 +25,7 @@
 
         <form id="loginForm">
           <div class="input-floating-group">
-            <label class="floating-label">Email</label>
+            <label class="floating-label" for="email">Email</label>
             <input type="email" id="email" class="login-input active-input" placeholder="Correo electrónico" required />
           </div>
 
@@ -79,7 +79,7 @@
         localStorage.setItem("smartlock_qr", data.qr);
         localStorage.setItem("smartlock_user", JSON.stringify(data.user));
         localStorage.setItem('smartlock_qrPayload', JSON.stringify({ userId: data.user.id, token: data.token }));
-        window.location.href = "dashboard.html";
+        globalThis.location.href = "dashboard.html";
       } else {
         document.getElementById("message").innerText = "❌ Credenciales inválidas";
       }

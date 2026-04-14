@@ -2,7 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const path = require("path");
+const path = require("node:path");
 
 require('./db'); // inicializa DB y tablas
 

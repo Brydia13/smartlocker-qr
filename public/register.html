@@ -25,17 +25,17 @@
 
         <form id="registerForm">
           <div class="input-floating-group">
-            <label class="floating-label">Tu Nombre</label>
+            <label class="floating-label" for="name">Tu Nombre</label>
             <input type="text" id="name" class="login-input" placeholder="Nombre completo" required />
           </div>
 
           <div class="input-floating-group">
-            <label class="floating-label">Fecha de nacimiento</label>
+            <label class="floating-label" for="dob">Fecha de nacimiento</label>
             <input type="date" id="dob" class="login-input" required />
           </div>
 
           <div class="input-floating-group">
-            <label class="floating-label">Email</label>
+            <label class="floating-label" for="email">Email</label>
             <input type="email" id="email" class="login-input active-input" placeholder="Correo electrónico" required />
           </div>
 
@@ -100,10 +100,10 @@
 
         msg.style.color = "green";
         msg.textContent = "Registro exitoso. Redirigiendo a login...";
-        setTimeout(() => (window.location.href = "login.html"), 1500);
+        setTimeout(() => (globalThis.location.href = "login.html"), 1500);
       } catch (error) {
         msg.style.color = "red";
-        msg.textContent = "Error de conexión con el servidor.";
+        msg.textContent = `Error de conexión con el servidor: ${error.message}`;
       }
     });
 

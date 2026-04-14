@@ -39,15 +39,16 @@
     const token = localStorage.getItem("smartlock_token");
 
     if (!user || !qr || !token) {
-      window.location.href = "login.html";
+      globalThis.location.href = "login.html";
     } else {
       document.getElementById("userName").innerText = user.name;
       document.getElementById("qrImage").src = qr;
 
       // Consultar locker asignado
-      fetch(`/api/lockers/my-locker?token=${token}`)
-        .then(res => res.json())
-        .then(data => {
+      (async () => {
+        try {
+          const res = await fetch(`/api/lockers/my-locker?token=${token}`);
+          const data = await res.json();
           const badge = document.getElementById("statusBadge");
           const statusText = document.getElementById("lockerStatusText");
           const details = document.getElementById("lockerDetails");
@@ -61,16 +62,16 @@
             statusText.innerText = "¡Listo para comenzar!";
             details.innerHTML = "Escanea el código QR de un locker disponible para que se te asigne automáticamente.";
           }
-        })
-        .catch(err => {
+        } catch (err) {
           console.error(err);
           document.getElementById("lockerStatusText").innerText = "Error de conexión";
-        });
+        }
+      })();
     }
 
     function logout() {
       localStorage.clear();
-      window.location.href = "login.html";
+      globalThis.location.href = "login.html";
     }
   </script>
 </body>
