@@ -47,13 +47,15 @@ jest.mock('bcrypt', () => {
       }
     }),
     compare: jest.fn().mockImplementation((password, hash, callback) => {
-      // Compara el hash de la contraseña con el hash almacenado
-      // eslint-disable-next-line global-require
       const crypto = require('node:crypto');
       const expectedHash = crypto.createHash('sha256').update(password).digest('hex');
       const result = hash === expectedHash;
-      setImmediate(() => callback(null, result));
-      return undefined;
+      if (typeof callback === 'function') {
+        setImmediate(() => callback(null, result));
+        return undefined;
+      } else {
+        return Promise.resolve(result);
+      }
     })
   };
 });

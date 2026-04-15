@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">43.68% </span>
+                <span class="strong">44.23% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>45/103</span>
+                <span class='fraction'>46/104</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">32.14% </span>
+                <span class="strong">34.48% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>9/28</span>
+                <span class='fraction'>10/29</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">48.27% </span>
+                <span class="strong">48.86% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>42/87</span>
+                <span class='fraction'>43/88</span>
             </div>
         
             
@@ -298,7 +298,8 @@
 <a name='L233'></a><a href='#L233'>233</a>
 <a name='L234'></a><a href='#L234'>234</a>
 <a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -352,6 +353,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -380,23 +399,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -591,13 +593,31 @@ router.post('/assign', (req, res) =&gt; {
   );
 });
 &nbsp;
+// Helper: auto-asigna un locker libre al usuario y lo abre
+function autoAssignAndOpen(userId, res) {
+  db.get('SELECT * FROM lockers WHERE status = ? LIMIT 1', ['free'], (err, freeLocker) =&gt; {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error buscando locker libre' });</span>
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!freeLocker) {
+      return res.status(404).json({ ok: false, error: 'No hay lockers libres disponibles' });
+    }
+<span class="cstat-no" title="statement not covered" >    db.run(</span>
+      'UPDATE lockers SET assigned_user_id = ?, status = ? WHERE id = ?',
+      [userId, 'occupied', freeLocker.id],
+<span class="fstat-no" title="function not covered" >      (d</span>bErr) =&gt; {
+<span class="cstat-no" title="statement not covered" >        if (dbErr) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error al auto-asignar locker' });</span></span>
+<span class="cstat-no" title="statement not covered" >        openLocker(freeLocker, userId, res, true);</span>
+      }
+    );
+  });
+}
+&nbsp;
 // 🔹 POST /api/open-with-qr → Escaneo de QR (Usuario o ESP32)
 router.post('/open-with-qr', (req, res) =&gt; {
   const { userId, token } = req.body;
 &nbsp;
-  // Validación de entrada 
+  // Validación de entrada
   if (!userId || !token) {
-    return res.status(400).json({ ok: false, error: "Datos incompletos" });
+    return res.status(400).json({ ok: false, error: 'Datos incompletos' });
   }
 &nbsp;
   // 1. Verificar sesión primero
@@ -606,32 +626,15 @@ router.post('/open-with-qr', (req, res) =&gt; {
     if (!session) return res.status(401).json({ ok: false, error: 'Sesión inválida' });
 &nbsp;
     // 2. Verificar si ya tiene un locker asignado
-    db.get('SELECT * FROM lockers WHERE assigned_user_id = ?', [userId], (err, locker) =&gt; {
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error de DB en lockers' });</span>
+    db.get('SELECT * FROM lockers WHERE assigned_user_id = ?', [userId], (lockerErr, locker) =&gt; {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (lockerErr) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error de DB en lockers' });</span>
 &nbsp;
       if (locker) {
         // --- CASO A: YA TIENE LOCKER ---
         openLocker(locker, userId, res);
       } else {
-        // --- CASO B: NO TIENE LOCKER -&gt; AUTO-ASIGNACIÓN (Self-Service) ---
-        db.get('SELECT * FROM lockers WHERE status = ? LIMIT 1', ['free'], (err, freeLocker) =&gt; {
-          <span class="missing-if-branch" title="if path not taken" >I</span>if (err) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error buscando locker libre' });</span>
-          <span class="missing-if-branch" title="else path not taken" >E</span>if (!freeLocker) {
-            return res.status(404).json({ ok: false, error: 'No hay lockers libres disponibles' });
-          }
-&nbsp;
-          // Asignar el locker al usuario
-<span class="cstat-no" title="statement not covered" >          db.run(</span>
-            'UPDATE lockers SET assigned_user_id = ?, status = ? WHERE id = ?',
-            [userId, 'occupied', freeLocker.id],
-<span class="fstat-no" title="function not covered" >            (e</span>rr) =&gt; {
-<span class="cstat-no" title="statement not covered" >              if (err) <span class="cstat-no" title="statement not covered" >return res.status(500).json({ ok: false, error: 'Error al auto-asignar locker' });</span></span>
-              
-              // Abrir el locker recién asignado
-<span class="cstat-no" title="statement not covered" >              openLocker(freeLocker, userId, res, true);</span>
-            }
-          );
-        });
+        // --- CASO B: NO TIENE LOCKER -&gt; AUTO-ASIGNACIÓN ---
+        autoAssignAndOpen(userId, res);
       }
     });
   });
@@ -775,7 +778,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-14T19:04:46.145Z
+                at 2026-04-15T00:02:14.795Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
