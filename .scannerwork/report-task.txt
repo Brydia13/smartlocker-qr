@@ -2,5 +2,5 @@ projectKey=mantenimiento_test
 serverUrl=http://localhost:9000
 serverVersion=26.2.0.119303
 dashboardUrl=http://localhost:9000/dashboard?id=mantenimiento_test
-ceTaskId=7eba8e4b-9609-4cfa-919d-6e413c0d0fa3
-ceTaskUrl=http://localhost:9000/api/ce/task?id=7eba8e4b-9609-4cfa-919d-6e413c0d0fa3
+ceTaskId=f39146b1-f133-4291-a5b2-56f6c060a209
+ceTaskUrl=http://localhost:9000/api/ce/task?id=f39146b1-f133-4291-a5b2-56f6c060a209

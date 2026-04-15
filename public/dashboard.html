@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
     const user = JSON.parse(localStorage.getItem("smartlock_user"));
     const qr = localStorage.getItem("smartlock_qr");
     const token = localStorage.getItem("smartlock_token");
@@ -44,37 +44,36 @@
       document.getElementById("userName").innerText = user.name;
       document.getElementById("qrImage").src = qr;
 
-      // Consultar locker asignado
-      async function initializeLocker() {
-        try {
-          const res = await fetch(`/api/lockers/my-locker?token=${token}`);
-          const data = await res.json();
-          const badge = document.getElementById("statusBadge");
-          const statusText = document.getElementById("lockerStatusText");
-          const details = document.getElementById("lockerDetails");
+      // Consultar locker asignado con top-level await (soportado en <script type="module">)
+      try {
+        const res = await fetch(`/api/lockers/my-locker?token=${token}`);
+        const data = await res.json();
+        const badge = document.getElementById("statusBadge");
+        const statusText = document.getElementById("lockerStatusText");
+        const details = document.getElementById("lockerDetails");
 
-          if (data.locker) {
-            badge.classList.remove("inactive");
-            statusText.innerHTML = `Locker ${data.locker.code} - ${data.locker.status.toUpperCase()}`;
-            details.innerHTML = "Tu locker asignado está listo para ser usado.";
-          } else {
-            badge.classList.add("inactive");
-            statusText.innerText = "¡Listo para comenzar!";
-            details.innerHTML = "Escanea el código QR de un locker disponible para que se te asigne automáticamente.";
-          }
-        } catch (err) {
-          console.error(err);
-          document.getElementById("lockerStatusText").innerText = "Error de conexión";
+        if (data.locker) {
+          badge.classList.remove("inactive");
+          statusText.innerHTML = `Locker ${data.locker.code} - ${data.locker.status.toUpperCase()}`;
+          details.innerHTML = "Tu locker asignado está listo para ser usado.";
+        } else {
+          badge.classList.add("inactive");
+          statusText.innerText = "¡Listo para comenzar!";
+          details.innerHTML = "Escanea el código QR de un locker disponible para que se te asigne automáticamente.";
         }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("lockerStatusText").innerText = "Error de conexión";
       }
-      
-      initializeLocker();
     }
 
     function logout() {
       localStorage.clear();
       globalThis.location.href = "login.html";
     }
+    
+    // Hacer que la función esté disponible en HTML (onclick)
+    globalThis.logout = logout;
   </script>
 </body>
 </html>
